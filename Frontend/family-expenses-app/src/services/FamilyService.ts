@@ -1,9 +1,11 @@
-import { db, LocalFamily } from '../db/database';
+import { db, LocalFamily, CachedRemoteFamily } from '../db/database';
 import { Family } from '../types/Family';
 
 const API_BASE_URL = 'http://localhost:5272/api';
 
 export class FamilyService {
+  private static inflightFamilies?: Promise<Array<{ id: string; name: string }>>;
+
   static async getCurrentFamily(): Promise<Family | null> {
     const family = await db.families.toCollection().first();
     return family ? this.toFamily(family) : null;
@@ -87,11 +89,29 @@ export class FamilyService {
     await db.families.put(localFamily);
   }
 
+  static async getLocalFamilies(): Promise<Array<{ id: string; name: string }>> {
+    const cached: CachedRemoteFamily[] = await db.remoteFamilies.toArray();
+    return cached.map(c => ({ id: c.id, name: c.name }));
+  }
+
   static async fetchRemoteFamilies(): Promise<Array<{ id: string; name: string }>> {
-    const res = await fetch(`${API_BASE_URL}/families`);
-    if (!res.ok) throw new Error(`Failed to fetch families: ${res.status}`);
-    const list = await res.json();
-    return (list as any[]).map(f => ({ id: String(f.id), name: String(f.name || '') }));
+    if (!this.inflightFamilies) {
+      this.inflightFamilies = (async () => {
+        const res = await fetch(`${API_BASE_URL}/families`);
+        if (!res.ok) throw new Error(`Failed to fetch families: ${res.status}`);
+        const list = await res.json();
+        const mapped = (list as any[]).map(f => ({ id: String(f.id), name: String(f.name || '') }));
+        // refresh cache: simple replace
+        await db.transaction('rw', db.remoteFamilies, async () => {
+          await db.remoteFamilies.clear();
+          await db.remoteFamilies.bulkPut(mapped.map(m => ({ id: m.id, name: m.name })));
+        });
+        return mapped;
+      })().finally(() => {
+        this.inflightFamilies = undefined;
+      });
+    }
+    return this.inflightFamilies;
   }
 
   static async setCurrentRemoteFamily(remoteId: string, name?: string): Promise<void> {

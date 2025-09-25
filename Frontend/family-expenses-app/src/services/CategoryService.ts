@@ -11,16 +11,21 @@ export class CategoryService {
   }
 
   static async getAll(): Promise<Category[]> {
-    try {
-      const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : false;
-      const remoteFamilyId = await FamilyService.getRemoteFamilyId();
+    // Local-first: return cached categories immediately
+    const localCategories = await db.categories.toArray();
+    const mappedLocal = localCategories.map(CategoryService.toCategory);
 
-      if (isOnline && remoteFamilyId) {
+    // Background refresh when possible
+    (async () => {
+      try {
+        const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : false;
+        const remoteFamilyId = await FamilyService.getRemoteFamilyId();
+        if (!isOnline || !remoteFamilyId) return;
+
         const res = await fetch(`${API_BASE_URL}/categories?familyId=${encodeURIComponent(remoteFamilyId)}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const remote = (await res.json()) as Array<{ id: string; name: string; description?: string; familyId: string; lastModified?: string }>;
 
-        // Upsert into local DB and mark as synced
         await Promise.all(
           remote.map(async (c) =>
             db.categories.put({
@@ -33,17 +38,12 @@ export class CategoryService {
             } as any)
           )
         );
-
-        // Return from remote (mapped as Category)
-        return remote.map((c) => ({ id: c.id, name: c.name, description: c.description }) as Category);
+      } catch (e) {
+        console.warn('CategoryService.getAll background refresh failed', e);
       }
-    } catch (e) {
-      // Swallow and fallback to local
-      console.warn('CategoryService.getAll remote fetch failed, using local cache', e);
-    }
+    })();
 
-    const categories = await db.categories.toArray();
-    return categories.map(CategoryService.toCategory);
+    return mappedLocal;
   }
 
   static async add(categoryData: CategoryFormData): Promise<Category> {

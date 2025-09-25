@@ -21,6 +21,11 @@ export interface LocalFamily {
   lastModified: Date;
 }
 
+export interface CachedRemoteFamily {
+  id: string; // remote GUID
+  name: string;
+}
+
 export interface LocalCategory extends BaseCategory {
   id?: string;
   syncStatus: 'pending' | 'synced' | 'error';
@@ -34,15 +39,21 @@ export class AppDatabase extends Dexie {
   categories!: Table<LocalCategory>;
   expenses!: Table<LocalExpense>;
   families!: Table<LocalFamily>;
+  remoteFamilies!: Table<CachedRemoteFamily>;
 
   constructor() {
     super('FamilyExpensesDB');
     
-    // bump schema version to 3 to add families.remoteId
+    // v3 existing
     this.version(3).stores({
       categories: 'id, name, syncStatus, lastModified, syncId, familyId',
       expenses: '++id, categoryId, date, syncStatus, lastModified',
       families: '++id, remoteId, name, syncStatus, lastModified'
+    });
+
+    // v4: add remoteFamilies cache
+    this.version(4).stores({
+      remoteFamilies: 'id, name'
     });
   }
 }

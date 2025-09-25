@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, TextField, Stack } from '@mui/material';
 import { FamilyService } from '../../services/FamilyService';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -13,29 +13,44 @@ const FamiliesPage: React.FC = () => {
   const [currentRemoteId, setCurrentRemoteId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const { showNotification } = useNotification();
+  const loadingRef = useRef(false);
 
-  const load = useCallback(async () => {
+  const load = async () => {
+    if (loadingRef.current) return;
+    loadingRef.current = true;
     try {
-      if (!navigator.onLine) {
-        setFamilies([]);
-        const rid = await FamilyService.getRemoteFamilyId();
-        setCurrentRemoteId(rid);
+      // 1) Local-first
+      const localList = await FamilyService.getLocalFamilies();
+      setFamilies(localList);
+      const ridLocal = await FamilyService.getRemoteFamilyId();
+      setCurrentRemoteId(ridLocal);
+
+      // 2) Background refresh if online
+      if (navigator.onLine) {
+        try {
+          const list = await FamilyService.fetchRemoteFamilies();
+          setFamilies(list);
+          const rid = await FamilyService.getRemoteFamilyId();
+          setCurrentRemoteId(rid);
+        } catch (e) {
+          // keep local data; do not spam notifications
+          console.warn('No se pudo refrescar familias desde el servidor', e);
+        }
+      } else {
         showNotification('Trabajando sin conexión', 'warning');
-        return;
       }
-      const list = await FamilyService.fetchRemoteFamilies();
-      setFamilies(list);
-      const rid = await FamilyService.getRemoteFamilyId();
-      setCurrentRemoteId(rid);
     } catch (e) {
       showNotification('Error al cargar familias', 'error');
       console.error(e);
+    } finally {
+      loadingRef.current = false;
     }
-  }, [showNotification]);
+  };
 
   useEffect(() => {
     load();
-  }, [load]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const selectFamily = async (fam: RemoteFamily) => {
     try {
@@ -59,7 +74,6 @@ const FamiliesPage: React.FC = () => {
       const created = await res.json();
       showNotification('Familia creada', 'success');
       setNewName('');
-      // set as current and reload list
       await FamilyService.setCurrentRemoteFamily(created.id, created.name);
       setCurrentRemoteId(created.id);
       await load();
@@ -76,7 +90,6 @@ const FamiliesPage: React.FC = () => {
       if (res.status === 204) {
         showNotification('Familia eliminada', 'success');
         if (currentRemoteId === fam.id) {
-          // clear current selection if it was the deleted one
           await FamilyService.setCurrentRemoteFamily('', '');
           setCurrentRemoteId(null);
         }
