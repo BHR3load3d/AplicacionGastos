@@ -1,0 +1,15 @@
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\obj\Debug\net9.0\FamilyExpenses.Application.csproj.AssemblyReference.cache
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\obj\Debug\net9.0\FamilyExpenses.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\obj\Debug\net9.0\FamilyExpenses.Application.AssemblyInfoInputs.cache
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\obj\Debug\net9.0\FamilyExpenses.Application.AssemblyInfo.cs
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\obj\Debug\net9.0\FamilyExpenses.Application.csproj.CoreCompileInputs.cache
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\bin\Debug\net9.0\FamilyExpenses.Application.deps.json
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\bin\Debug\net9.0\FamilyExpenses.Application.dll
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\bin\Debug\net9.0\FamilyExpenses.Application.pdb
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\bin\Debug\net9.0\FamilyExpenses.Domain.dll
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\bin\Debug\net9.0\FamilyExpenses.Domain.pdb
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\obj\Debug\net9.0\FamilyEx.4C575364.Up2Date
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\obj\Debug\net9.0\FamilyExpenses.Application.dll
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\obj\Debug\net9.0\refint\FamilyExpenses.Application.dll
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\obj\Debug\net9.0\FamilyExpenses.Application.pdb
+C:\Users\torra\OneDrive\Proyectos\AppGastos\src\Backend\FamilyExpenses.Application\obj\Debug\net9.0\ref\FamilyExpenses.Application.dll
