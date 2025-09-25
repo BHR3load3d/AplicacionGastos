@@ -52,9 +52,10 @@ storybook-static/
 # .NET / Visual Studio
 bin/
 obj/
-[Bb]uild/
-[Ll]og/
-[Tt]est[Rr]esult*/
+[Bb]in/
+[Oo]bj/
+**/bin/
+**/obj/
 .vs/
 *.user
 *.suo
